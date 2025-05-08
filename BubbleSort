@@ -67,21 +67,23 @@ int main()
             cin >> a[i];
         }
 
-        double start_time = omp_get_wtime();
+        double start_time = omp_get_wtime(); // Start timer
 
         if (choice == 1)
             bubble_sequential(a, n);
         else
             bubble_parallel(a, n);
 
-        double end_time = omp_get_wtime();
+        double end_time = omp_get_wtime(); // End timer
 
         cout << "\nSorted array: ";
         for (int i = 0; i < n; i++)
         {
             cout << a[i] << " ";
         }
-        cout << "\n\nExecution Time: " << (end_time - start_time) << " seconds" << endl;
+
+        // Print the execution time in milliseconds
+        cout << "\n\nExecution Time: " << (end_time - start_time) * 1000 << " milliseconds" << endl;
 
         delete[] a;
     } else {
