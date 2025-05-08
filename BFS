@@ -19,7 +19,8 @@ void bfs_sequential(int start) {
 
         cout << node << " ";
 
-        for (int adj : graph_bfs[node]) {
+        for (int i = 0; i < graph_bfs[node].size(); i++) {
+            int adj = graph_bfs[node][i];
             if (!visited_seq_bfs[adj]) {
                 visited_seq_bfs[adj] = true;
                 q.push(adj);
@@ -29,42 +30,30 @@ void bfs_sequential(int start) {
 }
 
 void bfs_parallel(int start, int n) {
-    vector<int> frontier;
-    frontier.push_back(start);
+    queue<int> q;
+    q.push(start);
     visited_par_bfs[start] = true;
 
-    while (!frontier.empty()) {
-        vector<int> next_frontier;
+    while (!q.empty()) {
+        int node = q.front();
+        q.pop();
+
+        cout << node << " ";
 
         #pragma omp parallel
         {
-            vector<int> local_frontier;
-
-            #pragma omp for nowait
-            for (int i = 0; i < frontier.size(); i++) {
-                int node = frontier[i];
-                cout << node << " ";
-
-                for (int adj : graph_bfs[node]) {
+            #pragma omp for
+            for (int i = 0; i < graph_bfs[node].size(); i++) {
+                int adj = graph_bfs[node][i];
+                #pragma omp critical
+                {
                     if (!visited_par_bfs[adj]) {
-                        bool expected = false;
-                        // Atomic check and set
-                        #pragma omp critical
-                        {
-                            if (!visited_par_bfs[adj]) {
-                                visited_par_bfs[adj] = true;
-                                local_frontier.push_back(adj);
-                            }
-                        }
+                        visited_par_bfs[adj] = true;
+                        q.push(adj);
                     }
                 }
             }
-
-            #pragma omp critical
-            next_frontier.insert(next_frontier.end(), local_frontier.begin(), local_frontier.end());
         }
-
-        frontier = next_frontier;
     }
 }
 
